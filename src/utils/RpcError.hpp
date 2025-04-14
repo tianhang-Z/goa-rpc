@@ -14,7 +14,7 @@ namespace rpc {
   XX(INTERNAL_ERROR, -32603, "Internal error")
 
 enum class ERROR {
-#define GEN_ERROR(e, c, s) PRC_##e,
+#define GEN_ERROR(e, c, s) RPC_##e,
   ERROR_MAP(GEN_ERROR)
 #undef GEN_ERROR
 };
