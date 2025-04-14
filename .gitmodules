@@ -1,0 +1,6 @@
+[submodule "third_party/goa-json"]
+	path = third_party/gos-json
+	url = https://github.com/tianhang-Z/goa-json.git
+[submodule "third_party/goa-ev"]
+	path = third_party/goa-ev
+	url = https://github.com/tianhang-Z/goa-ev.git
