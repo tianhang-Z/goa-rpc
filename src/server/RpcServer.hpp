@@ -1,8 +1,7 @@
 #pragma once
 #include <memory>
 #include <unordered_map>
-#include "EventLoop.hpp"
-#include "InetAddress.hpp"
+
 #include "goa-json/include/Value.hpp"
 #include "server/BaseServer.hpp"
 #include "server/RpcService.hpp"

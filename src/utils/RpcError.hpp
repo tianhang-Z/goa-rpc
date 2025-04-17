@@ -6,6 +6,7 @@ namespace goa {
 
 namespace rpc {
 
+// JSON-RPC规范错误码定义
 #define ERROR_MAP(XX)                              \
   XX(PARSE_ERROR, -32700, "Parse error")           \
   XX(INVALID_REQUEST, -32600, "Invalid request")   \
@@ -47,6 +48,7 @@ class RpcError {
         assert(false && "bad error code");
     }
   }
+
   static const int32_t errorCode[];
   static const char* errorString[];
 };
@@ -62,6 +64,9 @@ inline const char* RpcError::errorString[] = {
     ERROR_MAP(GEN_ERROR_STRING)
 #undef GEN_ERROR_STRING
 };
+
+#undef ERROR_MAP
+
 }  // namespace rpc
 
 }  // namespace goa

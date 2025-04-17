@@ -13,8 +13,6 @@
 #include <goa-ev/src/Timestamp.hpp>
 #include <goa-json/include/Value.hpp>
 
-#include "noncopyable.hpp"
-
 namespace goa {
 
 namespace rpc {

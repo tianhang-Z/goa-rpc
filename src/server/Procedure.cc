@@ -12,6 +12,7 @@ namespace rpc {
 template class Procedure<ProcedureReturnCallback>;
 template class Procedure<ProcedureNotifyCallback>;
 
+// 分别实现两个特化的模板
 template <>
 void Procedure<ProcedureReturnCallback>::validateRequest(
     goa::json::Value& request) const {
@@ -59,14 +60,15 @@ bool Procedure<Func>::validateGeneric(goa::json::Value& request) const {
   }
 
   switch (params.getType()) {
-    case goa::json::ValueType::TYPE_ARRAY:
+    case json::ValueType::TYPE_ARRAY:
       for (size_t i = 0; i < params_.size(); i++) {
         if (params[i].getType() != params_[i].paramType) {
           return false;
         }
-        break;
       }
-    case goa::json::ValueType::TYPE_OBJECT:
+      break;
+
+    case json::ValueType::TYPE_OBJECT:
       for (auto& p : params_) {
         auto it = params.findMember(p.paramName);
         if (it == params.endMember()) return false;

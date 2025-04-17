@@ -18,7 +18,7 @@ class NotifyException : public std::exception {
 
   const char* what() const noexcept { return err_.asString(); }
 
-  RpcError err() const {return err_};
+  RpcError err() const { return err_; }
 
   const char* detail() const { return detail_; }
 

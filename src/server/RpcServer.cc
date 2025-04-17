@@ -1,5 +1,3 @@
-#pragma once
-
 #include "server/RpcServer.hpp"
 #include <cassert>
 #include <cstddef>

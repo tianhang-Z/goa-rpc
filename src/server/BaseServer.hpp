@@ -22,7 +22,7 @@ class BaseServer {
 
  private:
   void onConnection(const TcpConnectionPtr& conn);
-  void onMessage(const TcpConnectionPtr& conn, Buffer* buf);
+  void onMessage(const TcpConnectionPtr& conn, Buffer& buf);
   void onWriteComplete(const TcpConnectionPtr& conn);
   void onHighWaterMark(const TcpConnectionPtr& conn, size_t mark);
 

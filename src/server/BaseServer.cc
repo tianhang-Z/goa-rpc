@@ -1,21 +1,17 @@
 #include "server/BaseServer.hpp"
-#include "server/RpcServer.hpp"
 
 #include <cstdint>
 #include <functional>
 #include <goa-json/include/Document.hpp>
 #include <goa-json/include/StringWriteStream.hpp>
 #include <goa-json/include/Writer.hpp>
-#include <mutex>
 
-#include "Buffer.hpp"
-#include "Logger.hpp"
 #include "goa-json/include/Exception.hpp"
 #include "goa-json/include/Value.hpp"
+#include "server/RpcServer.hpp"
 #include "utils/Exception.hpp"
 #include "utils/RpcError.hpp"
 #include "utils/utils.hpp"
-
 namespace goa {
 namespace rpc {
 
@@ -54,7 +50,7 @@ void BaseServer<ProtocolServer>::onConnection(const TcpConnectionPtr& conn) {
 
 template <typename ProtocolServer>
 void BaseServer<ProtocolServer>::onMessage(const TcpConnectionPtr& conn,
-                                           Buffer* buf) {
+                                           Buffer& buf) {
   try {
     handleMessage(conn, buf);
   }

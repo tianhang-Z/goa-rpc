@@ -33,6 +33,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 include_directories(third_party
+        ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/src)
 
 add_subdirectory(third_party/goa-ev)
