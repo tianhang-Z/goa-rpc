@@ -27,6 +27,7 @@ class NotifyException : public std::exception {
   const char* detail_;
 };
 
+// 包含id_信息
 class RequestException : public std::exception {
  public:
   RequestException(RpcError err, const json::Value& id, const char* detail)

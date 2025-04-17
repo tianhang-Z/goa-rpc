@@ -1,6 +1,16 @@
 #pragma once
 
+#include <goa-ev/src/Buffer.hpp>
+#include <goa-ev/src/Callbacks.hpp>
+#include <goa-ev/src/CountDownLatch.hpp>
 #include <goa-ev/src/EventLoop.hpp>
+#include <goa-ev/src/InetAddress.hpp>
+#include <goa-ev/src/Logger.hpp>
+#include <goa-ev/src/TcpClient.hpp>
+#include <goa-ev/src/TcpConnection.hpp>
+#include <goa-ev/src/TcpServer.hpp>
+#include <goa-ev/src/ThreadPool.hpp>
+#include <goa-ev/src/Timestamp.hpp>
 #include <goa-json/include/Value.hpp>
 
 #include "noncopyable.hpp"
@@ -9,8 +19,21 @@ namespace goa {
 
 namespace rpc {
 
+using namespace std::literals::string_view_literals;
+using namespace std::literals::chrono_literals;
+
+using ev::Buffer;
+using ev::ConnectionCallback;
+using ev::CountDownLatch;
 using ev::EventLoop;
+using ev::InetAddress;
 using ev::noncopyable;
+using ev::TcpClient;
+using ev::TcpConnection;
+using ev::TcpConnectionPtr;
+using ev::TcpServer;
+using ev::ThreadPool;
+
 using RpcDoneCallback = std::function<void(json::Value response)>;
 
 class UserDoneCallback {
