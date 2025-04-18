@@ -67,7 +67,6 @@ bool Procedure<Func>::validateGeneric(goa::json::Value& request) const {
         }
       }
       break;
-
     case json::ValueType::TYPE_OBJECT:
       for (auto& p : params_) {
         auto it = params.findMember(p.paramName);
