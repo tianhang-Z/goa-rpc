@@ -32,6 +32,11 @@ using ev::TcpConnectionPtr;
 using ev::TcpServer;
 using ev::ThreadPool;
 
+using std::placeholders::_1;
+using std::placeholders::_2;
+using std::placeholders::_3;
+using std::placeholders::_4;
+
 using RpcDoneCallback = std::function<void(json::Value response)>;
 
 class UserDoneCallback {

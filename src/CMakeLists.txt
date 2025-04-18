@@ -5,6 +5,7 @@ add_library(goa-rpc STATIC
             server/BaseServer.hpp server/BaseServer.cc
             server/RpcServer.hpp server/RpcServer.cc
             server/Procedure.hpp server/Procedure.cc
+            client/BaseClient.hpp client/BaseClient.cc
             )
 
 

@@ -21,7 +21,7 @@ class RpcService : noncopyable {
     procedureReturnList_.insert(
         {methodName, std::unique_ptr<ProcedureReturn>(p)});
   }
-  
+
   void addProcedureNotify(std::string_view methodName, ProcedureNotify* p) {
     assert(procedureNotifyList_.find(methodName) == procedureNotifyList_.end());
     procedureNotifyList_.insert(

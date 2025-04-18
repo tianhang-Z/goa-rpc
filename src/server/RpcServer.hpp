@@ -7,7 +7,6 @@
 #include "server/RpcService.hpp"
 #include "utils/utils.hpp"
 
-
 namespace goa {
 
 namespace rpc {
@@ -21,11 +20,10 @@ class RpcServer : public BaseServer<RpcServer> {
 
   ~RpcServer() = default;
 
-
   void addService(std::string_view serviceName, RpcService* service);
 
-
-  // 通过BaseServer 将其加入onMessage 并设置为server的回调 最终设置为ev::channel的回调 在有可读信号时被调用
+  // 通过BaseServer 将其加入onMessage 并设置为server的回调
+  // 最终设置为ev::channel的回调 在有可读信号时被调用
   void handleRequest(const std::string& json, const RpcDoneCallback& done);
 
  private:
@@ -39,8 +37,7 @@ class RpcServer : public BaseServer<RpcServer> {
   using RpcServicePtr = std::unique_ptr<RpcService>;
   using ServiceList = std::unordered_map<std::string_view, RpcServicePtr>;
   ServiceList services_;
-  
 };
 
-}
-}
+}  // namespace rpc
+}  // namespace goa

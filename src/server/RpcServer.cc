@@ -1,9 +1,11 @@
 #include "server/RpcServer.hpp"
+
 #include <cassert>
 #include <cstddef>
 #include <memory>
 #include <mutex>
 #include <string_view>
+
 #include "goa-json/include/Document.hpp"
 #include "goa-json/include/Exception.hpp"
 #include "goa-json/include/Value.hpp"
@@ -15,8 +17,7 @@ namespace goa {
 
 namespace rpc {
 
-
-namespace  {
+namespace {
 
 // 检测type是否和模板参数之一匹配
 template <json::ValueType dst, json::ValueType... rest>
@@ -25,7 +26,8 @@ void checkValueType(json::ValueType type) {
   if constexpr (sizeof...(rest) > 0) {
     checkValueType<rest...>(type);
   } else {
-    throw RequestException(RpcError(ERROR::RPC_INVALID_REQUEST),"bad type , must in field");
+    throw RequestException(RpcError(ERROR::RPC_INVALID_REQUEST),
+                           "bad type , must in field");
   }
 }
 
@@ -35,10 +37,9 @@ void checkValueType(json::ValueType type, json::Value& id) {
   try {
     checkValueType<types...>(type);
   } catch (RequestException& e) {
-    throw RequestException(e.err(),id,e.detail());
+    throw RequestException(e.err(), id, e.detail());
   }
 }
-
 
 template <json::ValueType... types>
 json::Value& findValue(json::Value& request, const char* key) {
@@ -53,7 +54,6 @@ json::Value& findValue(json::Value& request, const char* key) {
   return it->value;
 }
 
-
 // 加入 id
 template <json::ValueType... types>
 json::Value& findValue(json::Value& request, json::Value& id, const char* key) {
@@ -65,7 +65,7 @@ json::Value& findValue(json::Value& request, json::Value& id, const char* key) {
 }
 
 bool hasParams(const json::Value& request) {
-  return request.findMember("params") !=request.endMember();
+  return request.findMember("params") != request.endMember();
 }
 
 // 判断是否为一个notify请求，notify没有id，json-rpc 2.0协议
@@ -84,60 +84,60 @@ class ThreadSafeBatchResponse {
     data_->response_.addValue(response);
   }
 
+ private:
+  struct ThreadSafeDate {
+    explicit ThreadSafeDate(const RpcDoneCallback& done)
+        : response_(json::ValueType::TYPE_ARRAY), done_(done) {}
 
-private:
- struct ThreadSafeDate {
-   explicit ThreadSafeDate(const RpcDoneCallback& done)
-       : response_(json::ValueType::TYPE_ARRAY), done_(done) {}
+    ~ThreadSafeDate() { done_(response_); }
 
-   ~ThreadSafeDate() { done_(response_); }
-   
     std::mutex mutex_;
-   json::Value response_;
-   RpcDoneCallback done_;
- };
+    json::Value response_;
+    RpcDoneCallback done_;
+  };
 
- using DataPtr = std::shared_ptr<ThreadSafeDate>;
- DataPtr data_;
+  using DataPtr = std::shared_ptr<ThreadSafeDate>;
+  DataPtr data_;
 };
 
 }  // anonymous namespace
 
 void RpcServer::addService(std::string_view serviceName, RpcService* service) {
   assert(services_.find(serviceName) == services_.end());
-  services_.insert({serviceName,std::unique_ptr<RpcService>(service)});
+  services_.insert({serviceName, std::unique_ptr<RpcService>(service)});
 }
 
-// 通过BaseServer 将其加入onMessage 并设置为server的回调
-// 最终设置为ev::channel的回调 在有可读信号时被调用
-void RpcServer::handleRequest(
-    const std::string& json,
-    const RpcDoneCallback& done) {
-json::Document request;
-json::ParseError err = request.parse(json);
-if (err != json::ParseError::PARSE_OK) {
-    throw RequestException(
-        RpcError(ERROR::RPC_PARSE_ERROR),
-        json::parseErrorString(err));
-}
-switch (request.getType()) {
+// 通过BaseServer handleMessage时调用handleRequest, onMessage调用handleMessage
+// onMessage为BaseServer的回调  最终设置为ev::channel的回调 在有可读信号时被调用
+// 这里的done参数时BaseServer设置的lambda函数，调用sendResponse
+void RpcServer::handleRequest(const std::string& json,
+                              const RpcDoneCallback& done) {
+  // 将string反序列化为json格式的数据结构 并处理
+  json::Document request;
+  json::ParseError err = request.parse(json);
+  if (err != json::ParseError::PARSE_OK) {
+    throw RequestException(RpcError(ERROR::RPC_PARSE_ERROR),
+                           json::parseErrorString(err));
+  }
+  switch (request.getType()) {
     case json::ValueType::TYPE_OBJECT:
-    if (isNotify(request)) {
+      if (isNotify(request)) {
         handleSingleNotify(request);
-    } else {
-      handleSingleRequest(request, done);
-    }
-    break;
+      } else {
+        handleSingleRequest(request, done);
+      }
+      break;
     case json::ValueType::TYPE_ARRAY:
       handleBatchRequests(request, done);
       break;
     default:
-    throw RequestException(
-        RpcError(ERROR::RPC_INVALID_REQUEST),
-        "request should be json object or array");
-}
+      throw RequestException(RpcError(ERROR::RPC_INVALID_REQUEST),
+                             "request should be json object or array");
+  }
 }
 
+// 校验request并解析出service和method，调用service的callProcedureReturn方法
+// 该方法调用methodName对应的procedure
 void RpcServer::handleSingleRequest(json::Value& request,
                                     const RpcDoneCallback& done) {
   validateRequest(request);
@@ -168,17 +168,16 @@ void RpcServer::handleSingleRequest(json::Value& request,
   service->callProcedureReturn(methodName, request, done);
 }
 
-
 void RpcServer::handleBatchRequests(json::Value& requests,
                                     const RpcDoneCallback& done) {
   size_t num = requests.getSize();
   if (num == 0) {
-        throw RequestException(RpcError(ERROR::RPC_INVALID_REQUEST), "batch request is empty");
+    throw RequestException(RpcError(ERROR::RPC_INVALID_REQUEST),
+                           "batch request is empty");
   }
 
   // 可能存在竞态的点，因此用线程安全的自定义数据类型来存储结果responses的集合
-  ThreadSafeBatchResponse responses(
-      done);
+  ThreadSafeBatchResponse responses(done);
   try {
     size_t n = requests.getSize();
     for (size_t i = 0; i < n; ++i) {
@@ -191,28 +190,27 @@ void RpcServer::handleBatchRequests(json::Value& requests,
       if (isNotify(request)) {
         handleSingleNotify(request);
       } else {
-        // done为lambda函数，执行handleSingleRequest调用完method之后，通过done将结果response添加进结果集当中
-        // 当所有的request都执行完后，在responses析构时，再调用handleBatchRequests函数的done来处理结果集
-       // 线程安全，由于method调用时存在静态，结果集responses为临界区
+        // handleSingleRequest的done参数为lambda函数
+        // 执行handleSingleRequest调用完method之后，通过done将结果response添加进结果集当中
+        // 当所有的request都执行完后，在ThreadSafeBatchResponse responses析构时
+        // 再调用handleBatchRequests函数的done参数来处理结果集
+        // 线程安全，由于method调用时存在静态，结果集responses为临界区
         handleSingleRequest(request, [&](json::Value response) {
           responses.addResponse(response);
         });
       }
     }
-  }
-  catch (RequestException& e) {
+  } catch (RequestException& e) {
     // 失败信息也加入结果集
-  auto response = wrapException(e);
-  responses.addResponse(response);
-  }
-  catch (NotifyException& e) {
+    auto response = wrapException(e);
+    responses.addResponse(response);
+  } catch (NotifyException& e) {
     // notify失败是无需给用户返回信息的，因此notify成功与否，用户都应该能接受其结果，用户逻辑不应依赖于notify的成功
     WARN("notify error, code:{}, message:{}, data:{}", e.err().asCode(),
          e.err().asString(), e.detail());
-    }
+  }
 }
 
-    
 void RpcServer::handleSingleNotify(json::Value& request) {
   validateNotify(request);
 
@@ -238,10 +236,9 @@ void RpcServer::handleSingleNotify(json::Value& request) {
     auto& service = it->second;
     service->callProcedureNotify(methodName, request);
   }
-    }
+}
 
-    // 确认request合法
-
+// 确认request合法
 void RpcServer::validateRequest(json::Value& request) {
   auto& id =
       findValue<json::ValueType::TYPE_STRING, json::ValueType::TYPE_INT32,
@@ -254,13 +251,12 @@ void RpcServer::validateRequest(json::Value& request) {
                            "jsonrpc version must be 2.0");
   }
 
-  auto& method =
-      findValue<json::ValueType::TYPE_STRING>(request, id, "method");
+  auto& method = findValue<json::ValueType::TYPE_STRING>(request, id, "method");
   if (method.getStringView() == "rpc.") {
     throw RequestException(RpcError(ERROR::RPC_METHOD_NOT_FOUND), id,
                            "method name is internal use");
   }
-  
+
   size_t nMembers = 3u + hasParams(request);
 
   if (request.getSize() != nMembers) {
@@ -269,15 +265,13 @@ void RpcServer::validateRequest(json::Value& request) {
   }
 }
 void RpcServer::validateNotify(json::Value& request) {
-  auto& version =
-      findValue<json::ValueType::TYPE_STRING>(request, "jsonrpc");
+  auto& version = findValue<json::ValueType::TYPE_STRING>(request, "jsonrpc");
   if (version.getStringView() != "2.0") {
     throw NotifyException(RpcError(ERROR::RPC_INVALID_REQUEST),
                           "jsonrpc version must be 2.0");
   }
 
-  auto& method =
-      findValue<json::ValueType::TYPE_STRING>(request, "method");
+  auto& method = findValue<json::ValueType::TYPE_STRING>(request, "method");
   if (method.getStringView() == "rpc.") {
     throw NotifyException(RpcError(ERROR::RPC_METHOD_NOT_FOUND),
                           "method name is internal use");
@@ -289,6 +283,6 @@ void RpcServer::validateNotify(json::Value& request) {
     throw NotifyException(RpcError(ERROR::RPC_INVALID_REQUEST),
                           "unexpected field");
   }
-    }
 }
-}
+}  // namespace rpc
+}  // namespace goa

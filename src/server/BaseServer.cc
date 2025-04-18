@@ -87,6 +87,14 @@ void BaseServer<ProtocolServer>::onWriteComplete(const TcpConnectionPtr& conn) {
   conn->startRead();
 }
 
+/* message有header和body两部分组成
+header: body的长度
+body: response + crlf分隔符
+
+内存分布：header + "\r\n" + body + "\r\n"
+服务端和客户端都按这个格式收发信息
+*/
+// 从buf中获取消息string
 template <typename ProtocolServer>
 void BaseServer<ProtocolServer>::handleMessage(const TcpConnectionPtr& conn,
                                                Buffer& buf) {
