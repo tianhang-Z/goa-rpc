@@ -26,7 +26,7 @@ void StubGenerator::parseProto(json::Value& proto) {
   expect(nameIter->value.isString(), "type of service name must be string");
   serviceInfo_.name_ = nameIter->value.getStringView();
 
-  // 获取rpc
+  // 获取所有rpc调用
   auto rpcIter = proto.findMember("rpc");
   expect(rpcIter != proto.endMember(), "missing service rpc definition");
   expect(rpcIter->value.isArray(), "rpc field must be array");

@@ -40,3 +40,7 @@ add_subdirectory(third_party/goa-ev)
 add_subdirectory(third_party/goa-json)
 add_subdirectory(src)
 
+if (CMAKE_BUILD_EXAMPLES)
+        add_subdirectory(examples)
+endif()
+

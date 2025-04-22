@@ -6,6 +6,7 @@
 #include <goa-json/include/StringWriteStream.hpp>
 #include <goa-json/include/Writer.hpp>
 
+#include "goa-ev/src/Logger.hpp"
 #include "goa-json/include/Exception.hpp"
 #include "goa-json/include/Value.hpp"
 #include "server/RpcServer.hpp"
@@ -40,11 +41,11 @@ BaseServer<ProtocolServer>::BaseServer(EventLoop* loop,
 template <typename ProtocolServer>
 void BaseServer<ProtocolServer>::onConnection(const TcpConnectionPtr& conn) {
   if (conn->connected()) {
-    DEBUG("connection {} success", conn->peer().toIpPort());
+    INFO("connection {} success", conn->peer().toIpPort());
     conn->setHighWaterMarkCallback(
         std::bind(&BaseServer::onHighWaterMark, this, _1, _2), kHighWaterMark);
   } else {
-    DEBUG("connection {} fail", conn->peer().toIpPort());
+    INFO("connection {} fail", conn->peer().toIpPort());
   }
 }
 

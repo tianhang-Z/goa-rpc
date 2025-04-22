@@ -12,7 +12,6 @@ namespace goa {
 namespace rpc {
 
 // RpcServer管理RpcService，RpcService管理Procedure
-
 class RpcServer : public BaseServer<RpcServer> {
  public:
   RpcServer(EventLoop* loop, const InetAddress& local)

@@ -12,7 +12,9 @@ namespace rpc {
 
 class StubGenerator {
  public:
-  explicit StubGenerator(json::Value& proto) { parseProto(proto); }
+  explicit StubGenerator(json::Value& proto) {
+    parseProto(proto);  // 解析json 将rpc信息放入serviceInfo_
+  }
   virtual ~StubGenerator() = default;
 
   virtual std::string genStub() = 0;
