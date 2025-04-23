@@ -16,7 +16,7 @@ goa-rpc是一款基于C++20开发的使用于Linux的RPC（Remote Procedure Call
 
 ## 项目架构
 
-<img src=".\image&&uml\架构.png" style="zoom: 15%;" />
+<img src=".\image_uml\architecture.png" style="zoom: 15%;" />
 
 本项目编译生成的文件中包含有一个stub generator，可以根据spec.json中对一组rpc request和response的完整描述，自动生成client端和server端的stub代码。使用时client端（RPC调用方）只需包含生成的ClientStub头文件即可获取到相应的RPC服务，server端（RPC被调用方）除了要包含生成的ServiceStub头文件外，还需实现所提供的RPC服务的具体函数逻辑。
 
