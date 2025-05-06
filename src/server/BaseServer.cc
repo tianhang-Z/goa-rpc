@@ -142,7 +142,7 @@ void BaseServer<ProtocolServer>::handleMessage(const TcpConnectionPtr& conn,
               conn->peer().toIpPort())
       } else {
         TRACE(
-            "BaseServer::handleMessage() {} notify sucess",
+            "BaseServer::handleMessage() {} notify success",
             conn->peer()
                 .toIpPort());  // notify是没有response的，按协议无需发送应答给客户端
       }

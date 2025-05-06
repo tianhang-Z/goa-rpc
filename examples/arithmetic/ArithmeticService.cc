@@ -3,14 +3,17 @@
 
 using namespace goa::rpc;
 
+// CRTP设计模式
 class ArithmeticService : public ArithmeticServiceStub<ArithmeticService> {
  public:
   explicit ArithmeticService(RpcServer& server)
       : ArithmeticServiceStub(server), pool_(4) {}
 
   void Add(double lhs, double rhs, const UserDoneCallback& callback) {
-    pool_.runTask(
-        [=]() { callback(goa::json::Value(static_cast<double>(lhs + rhs))); });
+    pool_.runTask([=]() {
+      // 在这里处理lhs和rhs参数，之后交给UserDoneCallback，其会将result发送给客户端
+      callback(goa::json::Value(static_cast<double>(lhs + rhs)));
+    });
   }
 
   void Sub(double lhs, double rhs, const UserDoneCallback& callback) {
