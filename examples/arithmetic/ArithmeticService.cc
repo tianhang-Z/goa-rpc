@@ -12,7 +12,9 @@ class ArithmeticService : public ArithmeticServiceStub<ArithmeticService> {
   void Add(double lhs, double rhs, const UserDoneCallback& callback) {
     pool_.runTask([=]() {
       // 在这里处理lhs和rhs参数，之后交给UserDoneCallback，其会将result发送给客户端
-      callback(goa::json::Value(static_cast<double>(lhs + rhs)));
+      goa::json::Value result =
+          goa::json::Value(static_cast<double>(lhs + rhs));
+      callback(std::move(result));
     });
   }
 
